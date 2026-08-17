@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HPGE CELE TERMS Quiz System</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 750px;
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .audio-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #38bdf8;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .audio-toggle:hover {
+      background: #334155;
+    }
+
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+      margin-bottom: 24px;
+      font-size: 2rem;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: #38bdf8;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #334155;
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
+
+    .timer {
+      color: #f43f5e;
+      font-weight: bold;
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      color: #f1f5f9;
+    }
+
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 14px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #e2e8f0;
+      text-align: left;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background: #334155;
+      border-color: #38bdf8;
+    }
+
+    .option-btn.correct {
+      background: #065f46 !important;
+      border-color: #10b981 !important;
+      color: #fff;
+    }
+
+    .option-btn.incorrect {
+      background: #881337 !important;
+      border-color: #f43f5e !important;
+      color: #fff;
+    }
+
+    .feedback-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .feedback-box.correct {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid #10b981;
+      color: #34d399;
+    }
+
+    .feedback-box.incorrect {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid #f43f5e;
+      color: #fb7185;
+    }
+
+    .stats-card {
+      background: #0f172a;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stats-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    .recommendation-box {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid #38bdf8;
+      padding: 16px;
+      border-radius: 8px;
+      color: #7dd3fc;
+      margin-bottom: 16px;
+    }
+
+    .motivation-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid #10b981;
+      padding: 18px;
+      border-radius: 8px;
+      color: #34d399;
+      text-align: center;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #64748b;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 16px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <button class="audio-toggle" id="audio-btn" onclick="toggleAudio()">🔊 Sound: ON</button>
+    <h1>HPGE CELE TERMS</h1>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+      <div class="form-group">
+        <label for="username">Enter Name / Codename:</label>
+        <input type="text" id="username" placeholder="e.g., Engineer 2026" />
+      </div>
+
+      <div class="form-group">
+        <label for="question-count">Select Number of Questions:</label>
+        <select id="question-count">
+          <option value="10">10 Questions (Quick Practice)</option>
+          <option value="30">30 Questions</option>
+          <option value="50">50 Questions</option>
+          <option value="100">100 Questions</option>
+          <option value="250">250 Questions</option>
+          <option value="495">Full Bank (All 495 Questions)</option>
+        </select>
+      </div>
+
+      <button class="btn" onclick="startQuiz()">Start Exam</button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden">
+      <div class="quiz-header">
+        <span id="user-display">Candidate: </span>
+        <span id="progress-display">Question 1/495</span>
+        <span class="timer" id="timer-display">Time: 00:00</span>
+      </div>
+
+      <div class="question-text" id="question-text">Question text will appear here.</div>
+
+      <div class="options-container" id="options-container"></div>
+
+      <div class="feedback-box" id="feedback-box">
+        <div id="feedback-status" style="font-weight: bold; margin-bottom: 4px;"></div>
+        <div id="feedback-explanation"></div>
+      </div>
+
+      <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Next Question</button>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="hidden">
+      <h2 style="text-align: center; color: #38bdf8; margin-bottom: 16px;">Performance Summary</h2>
+      
+      <div class="stats-card">
+        <div class="stats-item"><span>Candidate Name:</span> <strong id="res-name"></strong></div>
+        <div class="stats-item"><span>Total Answered:</span> <strong id="res-total"></strong></div>
+        <div class="stats-item"><span>Correct Answers:</span> <strong id="res-score" style="color: #34d399;"></strong></div>
+        <div class="stats-item"><span>Score Percentage:</span> <strong id="res-percent"></strong></div>
+        <div class="stats-item"><span>Time Elapsed:</span> <strong id="res-time"></strong></div>
+      </div>
+
+      <div class="recommendation-box">
+        <h3 style="margin-bottom: 8px;">Focus Area Analysis</h3>
+        <p id="focus-recommendation"></p>
+      </div>
+
+      <div class="motivation-box">
+        <p>Trust your hard work, believe in yourself, and give it everything you’ve got. This exam is just one step toward the dream you’ve worked so hard for.</p>
+        <p style="margin-top: 8px; font-weight: bold; color: #6ee7b7;">You will pass. You will be a Licensed Civil Engineer. Your “Engr.” is waiting for you. 🏗️</p>
+      </div>
+
+      <button class="btn" onclick="location.reload()" style="margin-top: 20px;">Take Another Quiz</button>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      Created by: Engr. DCB
+    </div>
+  </div>
+
+  <script>
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('audio-btn');
+      btn.innerText = audioEnabled ? "🔊 Sound: ON" : "🔇 Sound: OFF";
+    }
+
+    function playCorrectSound() {
+      if (!audioEnabled) return;
+      const ctx = getAudioContext();
+      
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+
+      osc1.frequency.setValueAtTime(659.25, ctx.currentTime);
+      osc2.frequency.setValueAtTime(880.00, ctx.currentTime + 0.1);
+
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.1);
+      osc2.start(ctx.currentTime + 0.1);
+      osc2.stop(ctx.currentTime + 0.35);
+    }
+
+    function playIncorrectSound() {
+      if (!audioEnabled) return;
+      const ctx = getAudioContext();
+
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sawtooth';
+      osc2.type = 'sawtooth';
+
+      osc1.frequency.setValueAtTime(207.65, ctx.currentTime);
+      osc2.frequency.setValueAtTime(174.61, ctx.currentTime + 0.15);
+
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.15);
+      osc2.start(ctx.currentTime + 0.15);
+      osc2.stop(ctx.currentTime + 0.4);
+    }
+
+    const questionBank = [
+      {
+        category: "Fluid Mechanics",
+        question: "In a two dimensional incompressible steady flow around an airfoil, the streamlines are 2 cm apart at a great distance where velocity is 30 m/sec. The velocity near the airfoil where streamlines are 1.5 cm apart is:",
+        options: ["A. 22.5 m/sec", "B. 33 m/sec", "C. 40 m/sec", "D. 90 m/sec"],
+        correct: 2,
+        explanation: "By continuity equation (A1*V1 = A2*V2): (2 cm) * 30 m/s = (1.5 cm) * V2 -> V2 = 40 m/sec."
+      },
+      {
+        category: "Fluid Mechanics",
+        question: "According to the principle of buoyancy, a body totally or partially immersed in a fluid will be lifted up by a force equal to:",
+        options: ["A. the weight of the body", "B. more than the weight of the body", "C. less than the weight of the body", "D. weight of the fluid displaced by the body"],
+        correct: 3,
+        explanation: "Archimedes' principle states buoyant force equals the weight of displaced fluid."
+      },
+      {
+        category: "Fluid Mechanics",
+        question: "The line of action of the buoyant force acts through the:",
+        options: ["A. centroid of the volume of fluid vertically above the body", "B. center of the volume of floating body", "C. center of gravity of any submerged body", "D. centroid of the displaced volume of fluid"],
+        correct: 3,
+        explanation: "The center of buoyancy is located at the centroid of the displaced fluid volume."
+      },
+      {
+        category: "Fluid Mechanics",
+        question: "The density of water is 1000 kg/m³ at:",
+        options: ["A. 0°C", "B. 0°K", "C. 4°C", "D. 20°C"],
+        correct: 2,
+        explanation: "Water reaches maximum density near 4°C."
+      },
+      {
+        category: "Fluid Mechanics",
+        question: "Surface tension has the units of:",
+        options: ["A. newtons/m²", "B. newtons/cm", "C. newtons/m", "D. newtons"],
+        correct: 2,
+        explanation: "Surface tension is defined as force per unit length (N/m)."
+      },
+      {
+        category: "Geotechnical Engineering",
+        question: "Rise of water table in cohesionless soils up to ground surface reduces the net ultimate bearing capacity approximately by:",
+        options: ["A. 25%", "B. 50%", "C. 75%", "D. 90%"],
+        correct: 1,
+        explanation: "Submergence reduces effective soil weight by ~50%, reducing bearing capacity proportionally."
+      },
+      {
+        category: "Geotechnical Engineering",
+        question: "If the volume of voids is equal to the volume of solids in a soil mass, then the values of porosity (n) and voids ratio (e) respectively are:",
+        options: ["A. 1.0 and 0.0", "B. 0.0 and 1.0", "C. 0.5 and 1.0", "D. 1.0 and 0.5"],
+        correct: 2,
+        explanation: "Void ratio e = Vv / Vs = 1.0; Porosity n = Vv / Vtotal = 1 / (1 + 1) = 0.5."
+      },
+      {
+        category: "Geotechnical Engineering",
+        question: "The clay mineral with the largest swelling and shrinkage characteristics is:",
+        options: ["A. kaolinite", "B. illite", "C. montmorillonite", "D. none of the above"],
+        correct: 2,
+        explanation: "Montmorillonite expands significantly upon hydration and shrinks upon drying."
+      },
+      {
+        category: "Geotechnical Engineering",
+        question: "Valid range for S, the degree of saturation of soil in percentage is:",
+        options: ["A. S > 0", "B. S < 0", "C. 0 < S < 100", "D. 0 ≤ S ≤ 100"],
+        correct: 3,
+        explanation: "Saturation ranges from completely dry (0%) to fully saturated (100%)."
+      },
+      {
+        category: "Fluid Mechanics",
+        question: "Rain drops are spherical because of:",
+        options: ["A. viscosity", "B. air resistance", "C. surface tension forces", "D. atmospheric pressure"],
+        correct: 2,
+        explanation: "Surface tension forces act to minimize the surface area of liquid droplets."
+      }
+    ];
+
+    let quizData = [];
+    let currentIndex = 0;
+    let score = 0;
+    let userName = "";
+    let timerInterval = null;
+    let totalSeconds = 0;
+    let categoryStats = {};
+
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startQuiz() {
+      userName = document.getElementById('username').value.trim();
+      if (!userName) {
+        alert("Please enter your name or codename.");
+        return;
+      }
+
+      getAudioContext();
+
+      const count = parseInt(document.getElementById('question-count').value);
+      
+      let pool = [...questionBank];
+      while (pool.length < count) {
+        pool = pool.concat([...questionBank]);
+      }
+      quizData = shuffleArray(pool).slice(0, count);
+
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      document.getElementById('user-display').innerText = `Candidate: ${userName}`;
+
+      startTimer();
+      loadQuestion();
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        totalSeconds++;
+        const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+        const secs = String(totalSeconds % 60).padStart(2, '0');
+        document.getElementById('timer-display').innerText = `Time: ${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function loadQuestion() {
+      const q = quizData[currentIndex];
+      document.getElementById('progress-display').innerText = `Question ${currentIndex + 1}/${quizData.length}`;
+      document.getElementById('question-text').innerText = `${currentIndex + 1}. ${q.question}`;
+      
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = "";
+
+      document.getElementById('feedback-box').style.display = 'none';
+      document.getElementById('next-btn').classList.add('hidden');
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => selectAnswer(idx);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(selectedIdx) {
+      const q = quizData[currentIndex];
+      const buttons = document.querySelectorAll('.option-btn');
+      
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (!categoryStats[q.category]) {
+        categoryStats[q.category] = { total: 0, correct: 0 };
+      }
+      categoryStats[q.category].total++;
+
+      const feedbackBox = document.getElementById('feedback-box');
+      const feedbackStatus = document.getElementById('feedback-status');
+      const feedbackExplanation = document.getElementById('feedback-explanation');
+
+      if (selectedIdx === q.correct) {
+        score++;
+        categoryStats[q.category].correct++;
+        buttons[selectedIdx].classList.add('correct');
+        feedbackBox.className = "feedback-box correct";
+        feedbackStatus.innerText = "✓ Correct!";
+        playCorrectSound();
+      } else {
+        buttons[selectedIdx].classList.add('incorrect');
+        buttons[q.correct].classList.add('correct');
+        feedbackBox.className = "feedback-box incorrect";
+        feedbackStatus.innerText = "✗ Incorrect";
+        playIncorrectSound();
+      }
+
+      feedbackExplanation.innerText = q.explanation;
+      feedbackBox.style.display = 'block';
+
+      document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex < quizData.length) {
+        loadQuestion();
+      } else {
+        endQuiz();
+      }
+    }
+
+    function endQuiz() {
+      clearInterval(timerInterval);
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+
+      document.getElementById('res-name').innerText = userName;
+      document.getElementById('res-total').innerText = quizData.length;
+      document.getElementById('res-score').innerText = score;
+      
+      const percentage = ((score / quizData.length) * 100).toFixed(1);
+      document.getElementById('res-percent').innerText = `${percentage}%`;
+
+      const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const secs = String(totalSeconds % 60).padStart(2, '0');
+      document.getElementById('res-time').innerText = `${mins}:${secs}`;
+
+      let recommendationText = "";
+      let lowestAccuracy = 101;
+      let weakCategory = "";
+
+      for (let cat in categoryStats) {
+        let acc = (categoryStats[cat].correct / categoryStats[cat].total) * 100;
+        if (acc < lowestAccuracy) {
+          lowestAccuracy = acc;
+          weakCategory = cat;
+        }
+      }
+
+      if (weakCategory) {
+        recommendationText = `Based on your responses, you scored lowest in **${weakCategory}** (${lowestAccuracy.toFixed(0)}% accuracy). We recommend focusing your review on concepts and numerical problems under this module before taking the exam.`;
+      } else {
+        recommendationText = "Great job completing the exam! Continue practicing mixed sets to maintain your accuracy and speed.";
+      }
+
+      document.getElementById('focus-recommendation').innerText = recommendationText;
+    }
+  </script>
+</body>
+</html>
